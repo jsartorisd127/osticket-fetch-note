@@ -6,19 +6,40 @@ require_once('config.php');
 
 class FetchNotePlugin extends Plugin {
     var $config_class = 'FetchNotePluginConfig';
+    private static $instanceConfig = null;
+
+	static $pluginInstance = null;
+
+    private function getPluginInstance(?int $id){
+	if($id && ($i = $this->getInstance($id)))
+	    return $i;
+
+	return $this->getInstances()->first();
+    }
+
 
     function bootstrap() {
+        self::$pluginInstance = self::getPluginInstance(null);
+		
+        $pluginInstance = new FetchNotePlugin();
+        $pluginInstance->instanceConfig = $this->getConfig();
+        
         Signal::connect('ticket.created', array($this, 'onTicketCreated'));
     }
 
     function onTicketCreated($ticket){
+		global $cfg;
+		if(!$cfg instanceof OsTicketConfig){
+			error_log("FetchNote Plugin calls too early.");
+		}
+
         try {
             $payload = array(
                 'email' => $ticket->getEmail(),
             );
 
             $data_string = utf8_encode(json_encode($payload));
-            $url = $this->getConfig()->get('fetch-note-webhook-url');
+            $url = $this->getConfig(self::$pluginInstance)->get('fetch-note-webhook-url');
 
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
