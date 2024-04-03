@@ -3,6 +3,17 @@
 require_once INCLUDE_DIR . 'class.plugin.php';
 
 class FetchNotePluginConfig extends PluginConfig {
+
+   /**
+   * Build an Admin settings page.
+   *
+   * {@inheritdoc}
+   *
+   * @see PluginConfig::getOptions()
+   */
+   
+
+    
     function getOptions() {
         return array(
             'fetch-note' => new SectionBreakField(array(
